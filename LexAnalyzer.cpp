@@ -14,17 +14,17 @@ class LexAnalyzer {
 
     	// other private methods 
 
-        // pre: current line that is being scanned and index to start scanning from
-        // post: checks for longest valid sequence of characters.
-        // returns index where the valid id ends if lexeme is valid
-        // or -1 if lexeme is invalid
         int checkId(string line, int index) {
+            // pre: current line that is being scanned and index to start scanning from
+            // post: returns index where the valid id ends if lexeme is valid
+            // or -1 if lexeme is invalid
             string id = "";
             bool valid = true;
             int i = index;
 
             while (i < line.length() && valid) {
                 char c = line[i]; // current character
+                cout << "character: " << c << endl;
 
                 if ( (c > 'A' && c < 'Z') || (c > 'a' && c < 'z') ) // if character is a letter
                     id += c;
@@ -33,20 +33,25 @@ class LexAnalyzer {
 
                 i++;
             }
-
-            if (id == "") { // first character was not a letter
-                lexemes.push_back(id);
-                tokens.push_back("t_id");
+            
+            if (id == "") { // first character is not a letter
                 return -1;
             }
-            else 
+            else if (tokenmap[id] != "") { // valid keyword
+                lexemes.push_back(id);
+                tokens.push_back(tokenmap[id]);
+            }
+            // else { // valid id
+                lexemes.push_back(id);
+                tokens.push_back("t_id");
                 return i; // return where valid id ends
+            // }
         };
-        // pre: current line that is being scanned and index to start scanning from
-        // post: checks for longest valid sequence of characters.
-        // returns index where the valid int ends if lexeme is valid
-        // or -1 if lexeme is invalid
+        
         int checkInt(string line, int index) {
+            // pre: current line that is being scanned and index to start scanning from
+            // post: returns index where the valid int ends if lexeme is valid
+            // or -1 if lexeme is invalid
             string integer = "";
             bool valid = true;
             int i = index;
@@ -62,7 +67,7 @@ class LexAnalyzer {
                 i++;
             }
 
-            if (integer == "") // first character was not a letter
+            if (integer == "" || (i != line.length() && integer[i] > 'A' && integer[i] < 'z')) // int is not empty and last character is not a letter
                 return -1;
             else {
                 lexemes.push_back(integer);
@@ -70,11 +75,11 @@ class LexAnalyzer {
                 return i; // return where valid id ends
             }
         };
-        // pre: current line that is being scanned and index to start scanning from
-        // post: checks for longest valid sequence of characters.
-        // returns index where the valid line ends if lexeme is valid
-        // or -1 if lexeme is invalid
+        
         int checkString(string line, int index) { // COMPARE USING CHAR INSTEAD OF LINE[I] if you get an error
+            // pre: current line that is being scanned and index to start scanning from
+            // post: returns index where the valid string ends if lexeme is valid
+            // or -1 if lexeme is invalid
             string str = "";
             bool valid = true;
             int i = index;
@@ -115,6 +120,7 @@ class LexAnalyzer {
             string lexeme, token;
             while (infile >> token >> lexeme) {
                 tokenmap[lexeme] = token;
+                cout << token << " " << lexeme << endl;
             }
         };
         void scanFile(istream& infile, ostream& outfile) {
@@ -125,22 +131,28 @@ class LexAnalyzer {
             // file have been written to the output file.  If there is an error, 
             // the incomplete token/lexeme pairs, as well as an error message have // written to the output file.  A success or fail message has printed // to the console.
             string line;
-            bool valid = true;
+            bool valid;
+            
+            cout << endl;
 
             while (!infile.eof()) {
                 getline(infile, line);
 
+                cout << line << endl;
                 
                 string word = "";
+                valid = true;
                 int i=0;
                 while (i < line.length() && valid) {
-                    word += line[i];
-                    if (tokenmap[word] != "") { // found in tokenmap
-                        if (checkString(line, i) != -1) {
-                            i += checkString(line, i); // shift index to next character
+                    char c = line[i];
+                    word += c;
+                    cout << "word: " << word << endl;
+                    if (c = '"') { // found in tokenmap
+                        if (checkString(line, i) != -1) { // check if it's a string
+                            i = checkString(line, i); // shift index to next character
                             word = ""; // reset word that is being checked
                         } 
-                        else {
+                        else { // check if it's a keyword
                             lexemes.push_back(tokenmap[word]);
                             tokens.push_back(word);
                             i += word.length();
@@ -148,11 +160,11 @@ class LexAnalyzer {
                         }
                     }
                     else if (checkId(line, i) != -1) { // begins with a letter
-                        i += checkId(line, i); // shift index to next character in line
+                        i = checkId(line, i); // shift index to next character in line
                         word = "";
                     }
                     else if (checkInt(line, i) != -1) {
-                        i += checkInt(line, i);
+                        i = checkInt(line, i);
                         word = "";
                     }
                     else 
@@ -165,9 +177,11 @@ class LexAnalyzer {
 
             if (valid) {
                 outfile << "Source code file was scanned completely." << endl;
+                cout <<  "Source code file was scanned completely." << endl;
             }
             else {
                 outfile << "Source code file was scanned completely." << endl;
+                cout << "Source code file was scanned completely." << endl;
             }
             
             for (int i=0; i<lexemes.size(); i++) {
@@ -177,16 +191,23 @@ class LexAnalyzer {
 };
 
 int main() {
-    string inputFile, outputFile;
+    // string datafilename, inputfilename, outputfilename;
 
-    cout << "Enter input file name: ";
-    cin >> inputFile;
-    cout << "Enter output file name: ";
-    cin >> outputFile;
+    // // cout << "Enter data file name: ";
+    // // cin >> datafilename;
+    // // cout << "Enter input file name: ";
+    // // cin >> inputfilename;
+    // // cout << "Enter output file name: ";
+    // // cin >> outputfilename;
 
-    ifstream infile(inputFile);
-    ofstream outfile(outputFile);
+    ifstream datafile("tokenlexemedata.txt");
+    ifstream infile("sample.txt");
+    ofstream outfile("output.txt");
 
+    if (!datafile) {
+        cout << "error opening data file..." << endl;
+        exit(-1);
+    }
     if (!infile) {
         cout << "error opening input file..." << endl;
         exit(-1);
@@ -196,8 +217,8 @@ int main() {
         exit(-1);
     }
 
-    LexAnalyzer analyzer(infile);
-    // analyzer.scanFile(/*source code*/, outfile);
+    LexAnalyzer analyzer(datafile);
+    analyzer.scanFile(infile, outfile);
 
     return 0;
 }
