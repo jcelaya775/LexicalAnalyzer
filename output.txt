@@ -1,3 +1,24 @@
 Source code file was scanned completely.
-t_id : variableName
-t_int : 7423
+t_main : main
+t_id : 
+t_id : 
+t_id : 
+t_id : 
+t_begin : begin
+t_id : 
+t_id : 
+t_id : 
+t_id : 
+t_id : 
+t_id : 
+t_id : 
+t_id : 
+t_output : output
+t_id : hello
+t_id : world
+t_id : 
+t_id : 
+t_id : 
+t_id : 
+t_end : end
+t_main : main

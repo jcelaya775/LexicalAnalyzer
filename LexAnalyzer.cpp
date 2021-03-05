@@ -18,36 +18,39 @@ class LexAnalyzer {
             // pre: current line that is being scanned and index to start scanning from
             // post: returns index where the valid id ends if lexeme is valid
             // or -1 if lexeme is invalid
-            string id = "";
+            string word = "";
             bool valid = true;
             int i = index;
 
+            cout << "line: " << line << endl;
+
             char c = line[i];
-            if (c > '0' && c < '9') // first character is a number
+            if (c >= '0' && c <= '9') // first character is a number
                 return -1;
 
             while (i < line.length() && valid) {
                 c = line[i]; // current character
-                cout << "character: " << c << endl;
 
                 if ( (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') ) // if character is a letter or number
-                    id += c;
+                    word += c;
                 else 
                    valid = false;           
 
                 i++;
             }
 
-            cout << "id: " << id << endl;
+            cout << "word: " << word << endl;
             
-            if (tokenmap[id] != "") { // valid keyword
-                lexemes.push_back(id);
-                tokens.push_back(tokenmap[id]);
+            if (tokenmap[word] != "") { // valid keyword
+                cout << "is a keyword!" << endl;
+                lexemes.push_back(word);
+                tokens.push_back(tokenmap[word]);
             } else { // valid id
-                lexemes.push_back(id);
+                lexemes.push_back(word);
                 tokens.push_back("t_id");
             }
 
+            cout << "function return: " << i << endl;
             return i; // return where valid id ends
         };
         
@@ -58,6 +61,8 @@ class LexAnalyzer {
             string integer = "";
             bool valid = true;
             int i = index;
+
+            cout << "line: " << line << endl;
 
             char c = line[i];
             if (c <= '0' || c >= '9') // first character is a not a number
@@ -74,7 +79,7 @@ class LexAnalyzer {
                 i++;
             }
 
-            cout << "int: " << integer << endl;
+            cout << "int: " << integer << "\n\n";
 
             if (i != line.length() && integer[i] >= 'A' && integer[i] <= 'z') // next character is a letter
                 
@@ -93,6 +98,8 @@ class LexAnalyzer {
             string str = "";
             bool valid = true;
             int i = index;
+
+            cout << "line: " << line << endl;
 
             char c = line[i];
             if (c == '"') // first character is a double quote
@@ -122,6 +129,10 @@ class LexAnalyzer {
                 return -1;
 
         };
+        int checkSymbol(string line, int index) {
+            
+            return 0;
+        };
 
     public: 
         LexAnalyzer(istream &infile){
@@ -132,7 +143,6 @@ class LexAnalyzer {
             string lexeme, token;
             while (infile >> token >> lexeme) {
                 tokenmap[lexeme] = token;
-                cout << token << " " << lexeme << endl;
             }
         };
         void scanFile(istream& infile, ostream& outfile) {
@@ -149,26 +159,32 @@ class LexAnalyzer {
 
             while (!infile.eof()) {
                 getline(infile, line);
-
-                cout << line << endl;
                 
                 valid = true;
                 int i=0;
                 while (i < line.length() && valid) {
                     char c = line[i];
 
+                    cout << "i = " << i << endl;
+
                     int alphaResult, intResult, stringResult;
 
                     alphaResult = checkAlpha(line, i);
+                    cout << "alpha: " << alphaResult << endl;
                     intResult = checkInt(line, i);
                     stringResult = checkString(line, i);
 
-                    if (alphaResult != -1)
+                    cout << ", int: " << intResult << ", string: " << stringResult << endl;
+
+                    // TO DO: Check for symbols
+                    if (alphaResult != -1) {                       
                         i = alphaResult;
+                    }
                     else if (intResult != -1)
                         i = intResult;
                     else if (stringResult != -1)
                         i = stringResult;
+                    // else if valid symbol
                     else 
                         valid = false;
                 } 

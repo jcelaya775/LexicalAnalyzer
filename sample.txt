@@ -1,2 +1,4 @@
-variableName;
-7423
+main
+    begin
+        output"hello world"
+    end main
