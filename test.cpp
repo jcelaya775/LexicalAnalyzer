@@ -5,35 +5,44 @@
 using namespace std;
 
 int main() {
-    // string line;
-    // ifstream infile("tokenlexemedata.txt");
+    string line = "var3;";
+    int index = 0;
 
-    //  while (!infile.eof()) {
-    //     getline(infile, line);
+    string id = "";
+    bool valid = true;
+    int i = index;
 
-    //     cout << line << endl;
-    //  }
+    char c = line[i];
+    if (c > '0' && c < '9') { // first character is a number
+        cout << "error" << endl;
+        exit(-1);
+    }
 
-    // ofstream outfile("new.txt");
+    while (i < line.length() && valid) {
+        c = line[i]; // current character
 
-    // for (int i=0; i<10; i++) {
-    //     outfile << "hello" << endl;
-    // }
-    string s;
-    char c;
-    cout << "Enter character: ";
-    cin >> c;
-    cout << endl;
+        cout << "character: " << c << endl;
 
-    for (int i=0; i<10; i++) 
-        s += c;
+        if ( (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') ) {// if character is a letter or number
+            id += c;
+            cout << "id so far: " << id << endl;
+        }
+        else {
+            valid = false;
+            cout << "error in: " << c << endl;
+        }
+                    
 
-    cout << s << endl;
-
-    // if ( (c > 'A' && c < 'Z') || (c > 'a' && c < 'z') )
-    //     cout << "Is a letter!" << endl;
-    // else    
-    //     cout << "No letter here!" << endl;
+        i++;
+    }
+    cout << "id: " << id << endl;
+    
+    if (id == "main") // valid keyword
+        cout << "t_main : " << "main" << endl; 
+    else // valid id
+        cout << "t_id : " << id << endl;
+    
+    cout <<  i << endl; // return where valid id ends
 
     return 0;
 }

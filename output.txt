@@ -1,11 +1,3 @@
 Source code file was scanned completely.
-t_id : v
-t_id : v
-t_id : i
-t_id : i
-t_id : leN
-t_id : leN
-t_id : e
-t_id : e
-t_int : 7423
+t_id : variableName
 t_int : 7423
