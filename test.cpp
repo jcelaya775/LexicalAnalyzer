@@ -1,18 +1,25 @@
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <map>
 using namespace std;
 
 int main() {
-    map<string, string> m;
-    m["hi"] = "ello govena";
+    string line;
+    ifstream infile("tokenlexemedata.txt");
 
-    map<string, int>::iterator mitr;
+     while (!infile.eof()) {
+        getline(infile, line);
 
-    // for (mitr=m.begin(); mitr != m.end(); mitr++) 
-    //     cout << mitr->first << endl;
+        cout << line << endl;
+     }
 
-    cout << (m["hi"] == "") << endl;
+    ofstream outfile("new.txt");
+
+    for (int i=0; i<10; i++) {
+        outfile << "hello" << endl;
+    }
+        
 
     return 0;
 }

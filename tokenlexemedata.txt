@@ -2,8 +2,8 @@ t_begin begin
 t_end end 
 t_else else  
 t_if if  
-t_input input 
-t_integer integer
+t_input ineput 
+t_integer integr
 t_string string
 t_loop loop  
 t_main main
