@@ -7,9 +7,11 @@ t_id : integer
 t_id : x
 s_assign : =
 t_int : 5
+s_semi : ;
 t_output : output
 s_lparen : (
-t_str : "hello world"
+t_id : hello
+t_id : world
 s_rparen : )
 s_semi : ;
 t_end : end

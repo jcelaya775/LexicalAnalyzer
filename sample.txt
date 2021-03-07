@@ -1,5 +1,5 @@
 main()
     begin
         integer x=5;
-        output("hello world");
+        output("hello world);
     end main;

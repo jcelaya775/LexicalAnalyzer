@@ -17,7 +17,7 @@ class LexAnalyzer {
         int checkAlpha(string line, int index) {
             // pre: current line that is being scanned and index to start scanning from
             // post: returns index where the valid id ends if lexeme is valid
-            // or -1 if lexeme is invalid
+            // or -1 if lexeme is an invalid alphanumeric id or keyword
             string word = "";
             bool valid = true;
             int i = index;
@@ -35,28 +35,17 @@ class LexAnalyzer {
                 }
                 else 
                    valid = false;           
-
             }
 
             cout << "word: " << word << endl;
             
-
-            //TO DO: MOVE THESE TO SCANFILE()
-            if (tokenmap[word] != "") { // valid keyword
-                lexemes.push_back(word);
-                tokens.push_back(tokenmap[word]);
-            } else { // valid id
-                lexemes.push_back(word);
-                tokens.push_back("t_id");
-            }
-
             return i; // return where valid id ends
         };
         
         int checkInt(string line, int index) {
             // pre: current line that is being scanned and index to start scanning from
             // post: returns index where the valid int ends if lexeme is valid
-            // or -1 if lexeme is invalid
+            // or -1 if lexeme is an invalid int
             string integer = "";
             bool valid = true;
             int i = index;
@@ -68,29 +57,27 @@ class LexAnalyzer {
             while (i < line.length() && valid) {
                 char c = line[i]; // current character
                  
-                if (c >= '0' && c <= '9') // if character is a letter
+                if (c >= '0' && c <= '9') { // if character is a letter
                     integer += c;
+                    i++;
+                }
                 else // if not a letter
                    valid = false;           
-
-                i++;
             }
 
             cout << "int: " << integer << "\n\n";
 
-            if (i != line.length() && integer[i] >= 'A' && integer[i] <= 'z') // next character is a letter
+            if (i != line.length() && isLetter(line[i])) // next character is a letter
                 return -1;
             else {
-                lexemes.push_back(integer);
-                tokens.push_back("t_int");
+                cout << "return val int: " << i << endl;
                 return i; // return where valid id ends
             }
         };
-        
         int checkString(string line, int index) {
             // pre: current line that is being scanned and index to start scanning from
             // post: returns index where the valid string ends if lexeme is valid
-            // or -1 if lexeme is invalid
+            // or -1 if lexeme is an invalid string
             string str = "";
             bool valid = true;
             int i = index;
@@ -118,15 +105,16 @@ class LexAnalyzer {
             cout << "string: " << str << endl;
 
             if (i < line.length() && line[i-1] == '"') { // last character is a double quote
-                lexemes.push_back(str);
-                tokens.push_back("t_str");
                 return i; // return where valid id ends
             }
-            else 
+            else { // throw an error
                 return -1;
+            }
 
         };
         int checkSymbol(string line, int index) {
+            // pre: current line that is being scanned and index to start scanning from
+            // post: returns index where valid symbol ends or -1 if lexeme is not a valid symbol
             if (tokenmap[line.substr(index, 2)] != "") { // valid symbol of length two 
                 lexemes.push_back(line.substr(index, 2));
                 tokens.push_back(tokenmap[line.substr(index, 2)]);
@@ -140,9 +128,10 @@ class LexAnalyzer {
             } else // not a valid symbol
                 return -1;
         };
-        // pre: line that may contain spaces
-        // post: return line without leading spaces
+        
         string strip(string line) { 
+            // pre: line that may contain spaces
+            // post: return line without leading spaces
             int i=0;
             while (i<line.length() && line[i] == ' ') {
                 i++;
@@ -152,6 +141,18 @@ class LexAnalyzer {
 
 
             return line.substr(i, len); // return remaining string
+        }
+        string stringRange(string line, int begin, int end) {
+            // pre: line 
+            // post: string starting at begin index and ending at end index
+            int len = end - begin;
+            return line.substr(begin, len);
+        }
+        bool isLetter(char c) {
+            if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9'))
+                return true;
+            else
+                return false;
         }
 
     public: 
@@ -198,13 +199,35 @@ class LexAnalyzer {
 
                     cout << "alpha: " << alphaResult  << ", int: " << intResult << ", string: " << stringResult << ", symbol: " << symbolResult << endl;
 
-                    // TO DO: Check for symbols
-                    if (alphaResult != -1)  
-                        i = alphaResult;
-                    else if (intResult != -1)
+                    if (alphaResult != -1) {
+                        string word = stringRange(line, i, alphaResult);
+                        
+                        if (tokenmap[word] != "") { // valid keyword
+                            lexemes.push_back(word);
+                            tokens.push_back(tokenmap[word]);
+                        } else { // valid id
+                            lexemes.push_back(word);
+                            tokens.push_back("t_id");
+                        }
+
+                        i = alphaResult; // index where vaild word ends
+                    }
+                    else if (intResult != -1) {
+                        string integer = stringRange(line, i, intResult);
+
+                        lexemes.push_back(integer);
+                        tokens.push_back("t_int");
+
                         i = intResult;
-                    else if (stringResult != -1)
+                    }
+                    else if (stringResult != -1) {
+                        string str = stringRange(line, i, stringResult);
+
+                        lexemes.push_back(str);
+                        tokens.push_back("t_str");
+                        
                         i = stringResult;
+                    }
                     else if (symbolResult != -1)
                         i = symbolResult;
                     else if (c = ' ') 
