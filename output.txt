@@ -1,24 +1,17 @@
 Source code file was scanned completely.
 t_main : main
-t_id : 
-t_id : 
-t_id : 
-t_id : 
+s_lparen : (
+s_rparen : )
 t_begin : begin
-t_id : 
-t_id : 
-t_id : 
-t_id : 
-t_id : 
-t_id : 
-t_id : 
-t_id : 
+t_id : integer
+t_id : x
+s_assign : =
+t_int : 5
 t_output : output
-t_id : hello
-t_id : world
-t_id : 
-t_id : 
-t_id : 
-t_id : 
+s_lparen : (
+t_str : "hello world"
+s_rparen : )
+s_semi : ;
 t_end : end
 t_main : main
+s_semi : ;

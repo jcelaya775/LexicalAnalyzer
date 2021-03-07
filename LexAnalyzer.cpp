@@ -22,27 +22,27 @@ class LexAnalyzer {
             bool valid = true;
             int i = index;
 
-            cout << "line: " << line << endl;
-
             char c = line[i];
-            if (c >= '0' && c <= '9') // first character is a number
+            if ((c < 'A' || c > 'Z') && (c < 'a' || c > 'z')) // first character is not a letter
                 return -1;
 
             while (i < line.length() && valid) {
                 c = line[i]; // current character
 
-                if ( (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') ) // if character is a letter or number
+                if ( (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') ) {// if character is a letter or number
                     word += c;
+                    i++;
+                }
                 else 
                    valid = false;           
 
-                i++;
             }
 
             cout << "word: " << word << endl;
             
+
+            //TO DO: MOVE THESE TO SCANFILE()
             if (tokenmap[word] != "") { // valid keyword
-                cout << "is a keyword!" << endl;
                 lexemes.push_back(word);
                 tokens.push_back(tokenmap[word]);
             } else { // valid id
@@ -50,7 +50,6 @@ class LexAnalyzer {
                 tokens.push_back("t_id");
             }
 
-            cout << "function return: " << i << endl;
             return i; // return where valid id ends
         };
         
@@ -61,8 +60,6 @@ class LexAnalyzer {
             string integer = "";
             bool valid = true;
             int i = index;
-
-            cout << "line: " << line << endl;
 
             char c = line[i];
             if (c <= '0' || c >= '9') // first character is a not a number
@@ -82,7 +79,6 @@ class LexAnalyzer {
             cout << "int: " << integer << "\n\n";
 
             if (i != line.length() && integer[i] >= 'A' && integer[i] <= 'z') // next character is a letter
-                
                 return -1;
             else {
                 lexemes.push_back(integer);
@@ -99,28 +95,29 @@ class LexAnalyzer {
             bool valid = true;
             int i = index;
 
-            cout << "line: " << line << endl;
-
             char c = line[i];
-            if (c == '"') // first character is a double quote
-                i++;
-            else
+            if (c != '"') // first character is a double quote
                 return -1;
+            else {
+                str += c;
+                i++;
+            }
+                
 
             while (i < line.length() && valid) {
                 c = line[i]; // current character
 
                 if  (c == '"') // end of string
                     valid = false;
-                else 
-                   str += c;
+        
+                str += c;
 
                 i++;
             }
 
             cout << "string: " << str << endl;
 
-            if (str[i-1] == '"') { // last character is a double quote
+            if (i < line.length() && line[i-1] == '"') { // last character is a double quote
                 lexemes.push_back(str);
                 tokens.push_back("t_str");
                 return i; // return where valid id ends
@@ -130,9 +127,32 @@ class LexAnalyzer {
 
         };
         int checkSymbol(string line, int index) {
-            
-            return 0;
+            if (tokenmap[line.substr(index, 2)] != "") { // valid symbol of length two 
+                lexemes.push_back(line.substr(index, 2));
+                tokens.push_back(tokenmap[line.substr(index, 2)]);
+                cout << "symbol: " << line.substr(index, 2) << endl;
+                return index + 2;
+            } else if (tokenmap[line.substr(index, 1)] != "") { // valid symbol of length one
+                lexemes.push_back(line.substr(index, 1));
+                tokens.push_back(tokenmap[line.substr(index, 1)]);
+                cout << "symbol: " << line.substr(index, 1) << endl;
+                return index + 1;
+            } else // not a valid symbol
+                return -1;
         };
+        // pre: line that may contain spaces
+        // post: return line without leading spaces
+        string strip(string line) { 
+            int i=0;
+            while (i<line.length() && line[i] == ' ') {
+                i++;
+            }
+
+            int len = line.length() - i + 1;
+
+
+            return line.substr(i, len); // return remaining string
+        }
 
     public: 
         LexAnalyzer(istream &infile){
@@ -159,6 +179,7 @@ class LexAnalyzer {
 
             while (!infile.eof()) {
                 getline(infile, line);
+                line = strip(line);
                 
                 valid = true;
                 int i=0;
@@ -166,27 +187,32 @@ class LexAnalyzer {
                     char c = line[i];
 
                     cout << "i = " << i << endl;
+                    cout << "line: " << line << endl;
 
-                    int alphaResult, intResult, stringResult;
+                    int alphaResult, intResult, stringResult, symbolResult;
 
                     alphaResult = checkAlpha(line, i);
-                    cout << "alpha: " << alphaResult << endl;
                     intResult = checkInt(line, i);
                     stringResult = checkString(line, i);
+                    symbolResult = checkSymbol(line, i);
 
-                    cout << ", int: " << intResult << ", string: " << stringResult << endl;
+                    cout << "alpha: " << alphaResult  << ", int: " << intResult << ", string: " << stringResult << ", symbol: " << symbolResult << endl;
 
                     // TO DO: Check for symbols
-                    if (alphaResult != -1) {                       
+                    if (alphaResult != -1)  
                         i = alphaResult;
-                    }
                     else if (intResult != -1)
                         i = intResult;
                     else if (stringResult != -1)
                         i = stringResult;
-                    // else if valid symbol
-                    else 
+                    else if (symbolResult != -1)
+                        i = symbolResult;
+                    else if (c = ' ') 
+                        i++;
+                    else {
                         valid = false;
+                    }
+                        
                 } 
 
             }
@@ -196,8 +222,8 @@ class LexAnalyzer {
                 cout <<  "Source code file was scanned completely." << endl;
             }
             else {
-                outfile << "Source code file was scanned completely." << endl;
-                cout << "Source code file was scanned completely." << endl;
+                outfile << "Error - Source code file was not scanned completely. Error in line:\n" << line << endl;
+                cout << "Error - Source code file was not scanned completely. Error in line:\n" << line << endl;
             }
             
             for (int i=0; i<lexemes.size(); i++) {
