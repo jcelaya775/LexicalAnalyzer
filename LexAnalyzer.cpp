@@ -16,8 +16,7 @@ class LexAnalyzer {
 
         int checkAlpha(string line, int index) {
             // pre: current line that is being scanned and index to start scanning from
-            // post: returns index where the valid id ends if lexeme is valid
-            // or -1 if lexeme is an invalid alphanumeric id or keyword
+            // post: returns index where the valid id ends
             string word = "";
             bool valid = true;
             int i = index;
@@ -38,8 +37,7 @@ class LexAnalyzer {
         
         int checkInt(string line, int index) {
             // pre: current line that is being scanned and index to start scanning from
-            // post: returns index where the valid int ends if lexeme is valid
-            // or -1 if lexeme is an invalid int
+            // post: returns index where the valid int ends
             string integer = "";
             bool valid = true;
             int i = index;
@@ -59,8 +57,7 @@ class LexAnalyzer {
         };
         int checkString(string line, int index) {
             // pre: current line that is being scanned and index to start scanning from
-            // post: returns index where the valid string ends if lexeme is valid
-            // or -1 if lexeme is an invalid string
+            // post: returns index where the valid string ends
             string str = "";
             bool valid = true;
             int i = index + 1;              
@@ -89,7 +86,7 @@ class LexAnalyzer {
                 return -1;
         };
         string stringRange(string line, int begin, int end) {
-            // pre: line 
+            // pre: line of code
             // post: string starting at begin index and ending at end index
             int len = end - begin;
             return line.substr(begin, len);
@@ -164,7 +161,7 @@ class LexAnalyzer {
                         if (intResult == line.length() || (intResult != line.length() && !isalpha(line[intResult]))) { // next character is not a letter
                                 lexemes.push_back(integer);
                                 tokens.push_back("t_int");
-                                i = intResult;
+                                i = intResult; // index where vaild word ends
                         }
                         else {
                             errorMsg = "Error parsing int: '" + integer + "' in line " + to_string(lineCount) + ":\n\t" + line;
@@ -178,7 +175,7 @@ class LexAnalyzer {
                         if (line[i] == '\"' && line[stringResult-1] == '\"') { // starts and ends with quotes
                             lexemes.push_back(str);
                             tokens.push_back("t_str");
-                            i = stringResult;
+                            i = stringResult; // index where vaild word ends
                         } 
                         else {
                             str = stringRange(line, i, stringResult);
@@ -189,7 +186,7 @@ class LexAnalyzer {
                     else {
                         int symbolResult = checkSymbol(line, i);
                         string symbol;
-                        
+
                         if (symbolResult != -1) {
                             symbol = stringRange(line, i, symbolResult);
 
@@ -201,7 +198,7 @@ class LexAnalyzer {
                                 tokens.push_back(tokenmap[symbol]);
                             }
 
-                            i = symbolResult;
+                            i = symbolResult; // index where vaild word ends
                         } 
                         else {
                             if (i < line.length() -1 && !isalnum(line[i+1]))
@@ -227,6 +224,7 @@ class LexAnalyzer {
                 cout << "Error - Source code file was not scanned completely. " << errorMsg << endl;
             }
 
+            // print to output file
             for (int i=0; i<lexemes.size(); i++) {
                 outfile << tokens[i] << " : " << lexemes[i] << endl;
             }
