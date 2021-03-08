@@ -1,0 +1,4 @@
+main()
+    begin
+        34main;
+    end main;

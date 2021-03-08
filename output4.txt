@@ -1,0 +1,7 @@
+Error - Source code file was not scanned completely. Error parsing int: '34' in line 3:
+	34main;
+
+t_main : main
+s_lparen : (
+s_rparen : )
+t_begin : begin
