@@ -22,22 +22,16 @@ class LexAnalyzer {
             bool valid = true;
             int i = index;
 
-            char c = line[i];
-            if ((c < 'A' || c > 'Z') && (c < 'a' || c > 'z')) // first character is not a letter
-                return -1;
-
             while (i < line.length() && valid) {
-                c = line[i]; // current character
+                char c = line[i]; // current character
 
-                if ( (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') ) {// if character is a letter or number
+                if (isalnum(c)) {// if character is a letter or number
                     word += c;
                     i++;
                 }
                 else 
                    valid = false;           
             }
-
-            cout << "word: " << word << endl;
             
             return i; // return where valid id ends
         };
@@ -50,29 +44,18 @@ class LexAnalyzer {
             bool valid = true;
             int i = index;
 
-            char c = line[i];
-            if (c <= '0' || c >= '9') // first character is a not a number
-                return -1;
-
             while (i < line.length() && valid) {
                 char c = line[i]; // current character
                  
-                if (c >= '0' && c <= '9') { // if character is a letter
+                if (isdigit(c)) { // if character is a letter
                     integer += c;
                     i++;
                 }
                 else // if not a letter
                    valid = false;           
             }
-
-            cout << "int: " << integer << "\n\n";
-
-            if (i != line.length() && isLetter(line[i])) // next character is a letter
-                return -1;
-            else {
-                cout << "return val int: " << i << endl;
-                return i; // return where valid id ends
-            }
+            
+            return i; // return where valid id ends
         };
         int checkString(string line, int index) {
             // pre: current line that is being scanned and index to start scanning from
@@ -80,56 +63,38 @@ class LexAnalyzer {
             // or -1 if lexeme is an invalid string
             string str = "";
             bool valid = true;
-            int i = index;
-
-            char c = line[i];
-            if (c != '"') // first character is a double quote
-                return -1;
-            else {
-                str += c;
-                i++;
-            }
-                
+            int i = index + 1;              
 
             while (i < line.length() && valid) {
-                c = line[i]; // current character
+                char c = line[i]; // current character
 
-                if  (c == '"') // end of string
+                if  (c == '\"') // end of string
                     valid = false;
-        
-                str += c;
+                else 
+                    str += c;
 
                 i++;
             }
 
-            cout << "string: " << str << endl;
-
-            if (i < line.length() && line[i-1] == '"') { // last character is a double quote
-                return i; // return where valid id ends
-            }
-            else { // throw an error
-                return -1;
-            }
-
+            return i; // return where valid id ends
         };
         int checkSymbol(string line, int index) {
             // pre: current line that is being scanned and index to start scanning from
             // post: returns index where valid symbol ends or -1 if lexeme is not a valid symbol
-            if (tokenmap[line.substr(index, 2)] != "") { // valid symbol of length two 
-                lexemes.push_back(line.substr(index, 2));
-                tokens.push_back(tokenmap[line.substr(index, 2)]);
-                cout << "symbol: " << line.substr(index, 2) << endl;
+            if (index < line.length()-1 && tokenmap[line.substr(index, 2)] != "") { // valid symbol of length two 
                 return index + 2;
             } else if (tokenmap[line.substr(index, 1)] != "") { // valid symbol of length one
-                lexemes.push_back(line.substr(index, 1));
-                tokens.push_back(tokenmap[line.substr(index, 1)]);
-                cout << "symbol: " << line.substr(index, 1) << endl;
                 return index + 1;
             } else // not a valid symbol
                 return -1;
         };
-        
-        string strip(string line) { 
+        string stringRange(string line, int begin, int end) {
+            // pre: line 
+            // post: string starting at begin index and ending at end index
+            int len = end - begin;
+            return line.substr(begin, len);
+        }
+        string trimLeading(string line) { 
             // pre: line that may contain spaces
             // post: return line without leading spaces
             int i=0;
@@ -141,18 +106,6 @@ class LexAnalyzer {
 
 
             return line.substr(i, len); // return remaining string
-        }
-        string stringRange(string line, int begin, int end) {
-            // pre: line 
-            // post: string starting at begin index and ending at end index
-            int len = end - begin;
-            return line.substr(begin, len);
-        }
-        bool isLetter(char c) {
-            if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9'))
-                return true;
-            else
-                return false;
         }
 
     public: 
@@ -174,100 +127,126 @@ class LexAnalyzer {
             // file have been written to the output file.  If there is an error, 
             // the incomplete token/lexeme pairs, as well as an error message have // written to the output file.  A success or fail message has printed // to the console.
             string line;
-            bool valid;
+            string errorMsg;
+            bool valid = true;
             
-            cout << endl;
-
-            while (!infile.eof()) {
+            int lineCount = 1;
+            while (!infile.eof() && valid) {
                 getline(infile, line);
-                line = strip(line);
+                line = trimLeading(line);
                 
-                valid = true;
                 int i=0;
                 while (i < line.length() && valid) {
                     char c = line[i];
-
-                    cout << "i = " << i << endl;
-                    cout << "line: " << line << endl;
-
-                    int alphaResult, intResult, stringResult, symbolResult;
-
-                    alphaResult = checkAlpha(line, i);
-                    intResult = checkInt(line, i);
-                    stringResult = checkString(line, i);
-                    symbolResult = checkSymbol(line, i);
-
-                    cout << "alpha: " << alphaResult  << ", int: " << intResult << ", string: " << stringResult << ", symbol: " << symbolResult << endl;
-
-                    if (alphaResult != -1) {
+                    
+                    if (c == ' ') 
+                        i++;
+                    else if (isalpha(c)) {
+                        int alphaResult = checkAlpha(line, i);
                         string word = stringRange(line, i, alphaResult);
-                        
+
                         if (tokenmap[word] != "") { // valid keyword
                             lexemes.push_back(word);
                             tokens.push_back(tokenmap[word]);
-                        } else { // valid id
+                            
+                        }
+                        else { // valid id
                             lexemes.push_back(word);
                             tokens.push_back("t_id");
                         }
 
                         i = alphaResult; // index where vaild word ends
                     }
-                    else if (intResult != -1) {
+                    else if (isdigit(c)) {
+                        int intResult = checkInt(line, i);
                         string integer = stringRange(line, i, intResult);
 
-                        lexemes.push_back(integer);
-                        tokens.push_back("t_int");
-
-                        i = intResult;
+                        if (intResult == line.length() || (intResult != line.length() && !isalpha(line[intResult]))) { // next character is not a letter
+                                lexemes.push_back(integer);
+                                tokens.push_back("t_int");
+                                i = intResult;
+                        }
+                        else {
+                            errorMsg = "Error parsing int: '" + integer + "' in line " + to_string(lineCount) + ":\n\t" + line;
+                            valid = false;
+                        }
                     }
-                    else if (stringResult != -1) {
-                        string str = stringRange(line, i, stringResult);
+                    else if (c == '\"') {
+                        int stringResult = checkString(line, i);
+                        string str = stringRange(line, i+1, stringResult-1);
 
-                        lexemes.push_back(str);
-                        tokens.push_back("t_str");
-                        
-                        i = stringResult;
+                        if (line[i] == '\"' && line[stringResult-1] == '\"') { // starts and ends with quotes
+                            lexemes.push_back(str);
+                            tokens.push_back("t_str");
+                            i = stringResult;
+                        } 
+                        else {
+                            str = stringRange(line, i, stringResult);
+                            errorMsg = "Error parsing string: '" + str + "' in line " + to_string(lineCount) + ":\n\t" + line;
+                            valid = false;
+                        }
                     }
-                    else if (symbolResult != -1)
-                        i = symbolResult;
-                    else if (c = ' ') 
-                        i++;
                     else {
-                        valid = false;
-                    }
+                        int symbolResult = checkSymbol(line, i);
+                        string symbol;
                         
-                } 
+                        if (symbolResult != -1) {
+                            symbol = stringRange(line, i, symbolResult);
 
+                            if (symbol.length() == 2) {
+                                lexemes.push_back(symbol);
+                                tokens.push_back(tokenmap[symbol]);
+                            } else if (symbol.length() == 1) {
+                                lexemes.push_back(symbol);
+                                tokens.push_back(tokenmap[symbol]);
+                            }
+
+                            i = symbolResult;
+                        } 
+                        else {
+                            if (i < line.length() -1 && !isalnum(line[i+1]))
+                                symbol = stringRange(line, i, i+2);
+                            else 
+                                symbol = stringRange(line, i, i+1);
+
+                            errorMsg = "Error parsing symbol '" + symbol + "' in line " + to_string(lineCount) + ":\n\t" + line;
+                            valid = false;
+                        }
+                    } 
+                }
+
+                lineCount++;
             }
 
             if (valid) {
-                outfile << "Source code file was scanned completely." << endl;
+                outfile << "Source code file was scanned completely." <<"\n\n";
                 cout <<  "Source code file was scanned completely." << endl;
             }
             else {
-                outfile << "Error - Source code file was not scanned completely. Error in line:\n" << line << endl;
-                cout << "Error - Source code file was not scanned completely. Error in line:\n" << line << endl;
+                outfile << "Error - Source code file was not scanned completely. " << errorMsg << "\n\n";
+                cout << "Error - Source code file was not scanned completely. " << errorMsg << endl;
             }
-            
+
             for (int i=0; i<lexemes.size(); i++) {
                 outfile << tokens[i] << " : " << lexemes[i] << endl;
             }
-    };
+        }
 };
 
 int main() {
-    // string datafilename, inputfilename, outputfilename;
+    string datafilename, inputfilename, outputfilename;
 
-    // // cout << "Enter data file name: ";
-    // // cin >> datafilename;
-    // // cout << "Enter input file name: ";
-    // // cin >> inputfilename;
-    // // cout << "Enter output file name: ";
-    // // cin >> outputfilename;
+    cout << "Enter data file name: ";
+    cin >> datafilename;
+    cout << "Enter input file name: ";
+    cin >> inputfilename;
+    cout << "Enter output file name: ";
+    cin >> outputfilename;
+    cout << endl;
 
-    ifstream datafile("tokenlexemedata.txt");
-    ifstream infile("sample.txt");
-    ofstream outfile("output.txt");
+    ifstream datafile(datafilename);
+    ifstream infile(inputfilename);
+    ofstream outfile(outputfilename);
 
     if (!datafile) {
         cout << "error opening data file..." << endl;
